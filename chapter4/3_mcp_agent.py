@@ -36,14 +36,14 @@ async def initialize_llm():
             },
             # AWS Knowledge MCPサーバー
             "aws-knowledge-mcp-server": {
-                # "url": "https://knowledge-mcp.global.api.aws",
-                # "transport": "streamable_http",
-                "command": "npx",
-                "args": [
-                    "mcp-remote",
-                    "https://knowledge-mcp.global.api.aws"
-                ],
-                "transport": "stdio"
+                "url": "https://knowledge-mcp.global.api.aws",
+                "transport": "streamable_http",
+                # "command": "npx",
+                # "args": [
+                #     "mcp-remote",
+                #     "https://knowledge-mcp.global.api.aws"
+                # ],
+                # "transport": "stdio"
             }
         }
     )

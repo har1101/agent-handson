@@ -1,6 +1,7 @@
 # 3_mcp_agent.py実行時エラー
 
-手順通りに実装した場合も、みのるんさんのGitHubからコピペした場合も、同じエラーが起きました。
+手順通りに実装した場合も、みのるんさんのGitHubからコピペした場合も、同じ403エラーが起きました。
+GitHub CodespacesからのKnowledge MCPサーバー接続が許可されていないかも…？
 
 ```terminal
 $ python 3_mcp_agent.py 
@@ -13,6 +14,17 @@ task: <Task finished name='Task-2' coro=<load_mcp_tools() done, defined at /usr/
   |            ^^^^^^^^^^^^^^^^
 
 (略)
+  +-+---------------- 1 ----------------
+    | Traceback (most recent call last):
+    |   File "/usr/local/python/3.12.1/lib/python3.12/site-packages/mcp/client/streamable_http.py", line 405, in handle_request_async
+    |     await self._handle_post_request(ctx)
+    |   File "/usr/local/python/3.12.1/lib/python3.12/site-packages/mcp/client/streamable_http.py", line 277, in _handle_post_request
+    |     response.raise_for_status()
+    |   File "/home/codespace/.local/lib/python3.12/site-packages/httpx/_models.py", line 829, in raise_for_status
+    |     raise HTTPStatusError(message, request=request, response=self)
+    | httpx.HTTPStatusError: Client error '403 Forbidden' for url 'https://knowledge-mcp.global.api.aws'
+    | For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/403
+    +------------------------------------
 
 During handling of the above exception, another exception occurred:
 
@@ -34,7 +46,7 @@ UnboundLocalError: cannot access local variable 'tools' where it is not associat
 ## mcp-remoteを使う方法へ切り替える
 
 少し実装を変えて、[ドキュメントに記載されていたmcp-remoteを使う方法へ切り替え](https://github.com/awslabs/mcp/tree/main/src/aws-knowledge-mcp-server)ましたが、接続はできませんでした。
-エラー内容は別で、CloudFrontによる403エラーだったので、WAFに引っかかっているのかも…と思いました。
+エラー内容が少し詳細になり、CloudFrontによる403エラーだったので、Knowledge MCP側のWAFに引っかかっているのかも…と思いました(本当に設定されているかは確認できていませんが…)。
 
 ```terminal
 $ python 3_mcp_agent.py 
@@ -121,13 +133,28 @@ Starting MCP inspector...
 ## 比較：ローカル環境で動かす
 
 原因切り分けの一環として、ローカル環境でも同じコードを用意し、動かしてみました。
+こちらだと問題なく動作しました。
+```terminal
+(agent-handson) chapter4 $  uv run 3_mcp_agent.py 
+
+Secure MCP Filesystem Server running on stdio
+Client does not support MCP Roots, using allowed directories set from server args: [
+  '/project/path/agent-handson/chapter4'
+]
+Secure MCP Filesystem Server running on stdio
+Client does not support MCP Roots, using allowed directories set from server args: [
+  '/project/path/agent-handson/chapter4'
+]
+{'messages': [HumanMessage(content='Bedrockで利用可能なモデルプロパイダーを教えて！', additional_kwargs={}, response_metadata={}), AIMessage(content=[{'type': 'text', 'text': 'AWS Bedrockで利用可能なモデルプロバイダーについての情報を検索して、Markdown形式でファイルに出力します。\n\nまずはAWS Bedrockに関する情報を検索してみましょう。'}, {'type': 'tool_use', 'name': 'aws___search_documentation', 'input': {'search_phrase': 'AWS Bedrock available model providers', 'limit': 10}, 
+(略)
+```
+
+[実行結果ファイルはこちら(chapter4/aws_bedrock_model_providers.md)](chapter4/aws_bedrock_model_providers.md)
 
 
 ### VSCodeターミナルで@modelcontextprotocol/inspectorを実行
 
-こちらは問題なく接続でき、ツール実行までできました。
+こちらも問題なく接続でき、ツール実行までできました。
 
 ![alt text](mcp_inspector_success.png)
-
-## 
 
